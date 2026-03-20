@@ -1,0 +1,6 @@
+@MediaRTutorial_HostAddress = http://localhost:5045
+
+GET {{MediaRTutorial_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
