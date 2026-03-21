@@ -55,11 +55,13 @@ namespace MediaRTutorial.Controllers
         public async Task<ActionResult<BasketDto>> AddToBasket([FromBody] AddToBasketCommand command)
         {
             var result = await _mediator.Send(command);
-            return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
+            return result.IsSuccess 
+                ?
+                Ok(result.Data) : BadRequest(result.ErrorMessage);
         }
 
         [HttpPost("Remove")]
-        public async Task<ActionResult<BasketDto>> RemoveFromBasket([FromBody] RemoveFromBasketCommand command)
+        public async Task<ActionResult<BasketDto>> RemoveFromBasket(RemoveFromBasketCommand command)
         {
             var result = await _mediator.Send(command);
             return result.IsSuccess ? Ok(result.Data) : BadRequest(result.ErrorMessage);
