@@ -59,7 +59,7 @@ API Layer
 
 ### 1. Clone the repo
 
-git clone https://github.com/your-username/ecommerce-api.git
+git clone https://github.com/fathigasim/E-CommerceBack
 cd ecommerce-api
 
 ---
