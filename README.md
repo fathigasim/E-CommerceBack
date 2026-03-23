@@ -16,7 +16,7 @@ This is a scalable e-commerce backend built using ASP.NET Core following Clean A
 - Stripe Payment Integration
 - Global Error Handling Middleware
 - AutoMapper for object mapping
-
+- Implemented global exception handling middleware with ProblemDetails, validation handling, logging, and localization support
 ---
 
 ##  Architecture
