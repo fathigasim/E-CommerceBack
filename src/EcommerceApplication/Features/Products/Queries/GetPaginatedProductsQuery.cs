@@ -6,6 +6,6 @@ using MediatR;
 namespace EcommerceApplication.Features.Products.Queries
 {
     
-    public record GetPaginatedProductsQuery(string? q,Guid? categoryId,int Page, int PageSize)
+    public record GetPaginatedProductsQuery(string? q,Guid? categoryId,int Page, int PageSize=6)
     : IRequest<Result<PaginatedList<ProductDto>>>;
 }

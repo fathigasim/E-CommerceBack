@@ -9,11 +9,9 @@ using System.Threading.Tasks;
 namespace EcommerceApplication.Features.Auth.Commands.UserManagement.ResetPassword
 {
    
-    public class ResetPasswordCommand : IRequest<Result<string>>
+   public class ForegotPasswordCommand : IRequest<Result<string>>
     {
+       
         public string Email { get; set; }
-        public string Token { get; set; }
-        public string NewPassword { get; set; }
-        public string NewPasswordConfirm { get; set; }
     }
 }

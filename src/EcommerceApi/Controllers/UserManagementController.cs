@@ -30,13 +30,25 @@ namespace EcommerceApi.Controllers
         }
 
         // POST api/<UserManagementController>
-        [HttpPost]
-        public async Task<IActionResult> PostAsync(string email)
+        [HttpPost("ForegotPassword")]
+        public async Task<IActionResult> PostForegotPasswordAsync(ForegotPasswordCommand command)
         {
-            var result = await _mediator.Send(new ResetPasswordCommand(email));
+            var result = await _mediator.Send( command);
             return Ok(result);
         }
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> PostResetPasswordAsync([FromBody] ResetPasswordCommand command)
+        {
+            //if (command == null)
+            //    return BadRequest("Command is null");
 
+            var result = await _mediator.Send(command);
+
+            //if (!result.IsSuccess)
+            //    return BadRequest(result);
+
+            return Ok(result);
+        }
         // PUT api/<UserManagementController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)
