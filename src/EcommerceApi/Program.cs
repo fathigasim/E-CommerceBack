@@ -138,30 +138,26 @@ builder.Services.AddAuthorization(options =>
 });
 var app = builder.Build();
 
-
-// Use Request Localization Middleware (MUST be before other middleware)
+// 1. Request Localization
 app.UseRequestLocalization();
-// Seed database
+
+// 2. Seed database
 await app.SeedDatabaseAsync();
-// HTTPS Redirection FIRST (or remove it for local dev)
+
+// 3. HTTPS Redirect (disabled in dev)
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-app.UseRouting();
-app.UseCors("DevCors");
-//  Exception middleware FIRST (before other middleware)
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 
+// 4. Development tools
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-
-
-// Static Files
+// 5. Static Files (before routing)
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
@@ -175,10 +171,20 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/StaticImages"
 });
 
+// 6. ROUTING
+app.UseRouting();
 
+// 7. CORS (must be between UseRouting and UseEndpoints/MapControllers)
+app.UseCors("DevCors");
+
+// 8. Authentication & Authorization (BEFORE exception middleware)
 app.UseAuthentication();
 app.UseAuthorization();
 
+// 9. Exception Middleware (LAST so CORS headers are already set)
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// 10. Map Controllers
 app.MapControllers();
 
 app.Run();
