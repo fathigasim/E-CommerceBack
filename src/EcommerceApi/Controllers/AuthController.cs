@@ -22,7 +22,7 @@ namespace MediaRTutorial.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] RegisterCommand command)
+        public async Task<IActionResult> Register([FromForm] RegisterCommand command)
         {
             var result = await _mediator.Send(command);
 

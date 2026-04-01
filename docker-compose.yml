@@ -1,0 +1,78 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: src/EcommerceApi/Dockerfile
+    ports:
+      - "5000:8080"
+    volumes:
+      - product-images:/app/wwwroot/uploads/products
+    networks:
+      - mynetwork
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=EcommerceDb;User=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True;
+      - JwtSettings__Issuer=${Token_Issuer}
+      - JwtSettings__Audience=${Token_Audience}
+      - JwtSettings__SecretKey=${Token_SecretKey}
+      - JwtSettings__ExpirationMinutes=${Token_ExpirationMinutes}
+      - JwtSettings__RefreshTokenExpirationInDays=${Token_RefreshTokenExpirationInDays}
+      - FrontendUrl__FrontendUrl=${FrontendUrl_FrontendUrl}
+      - SmtpSettings__Host=${Smtp_Host}
+      - SmtpSettings__Port=${Smtp_Port}
+      - SmtpSettings__EnableSSL=${Smtp_EnableSSL}
+      - SmtpSettings__From=${Smtp_From}
+      - SmtpSettings__DisplayName=${Smtp_DisplayName}
+      - SmtpSettings__UserName=${Smtp_Username}
+      - SmtpSettings__Password=${Smtp_Password}
+      - Stripe__StripeKey=${Stripe_StripeKey}
+      - Stripe__WebhookSecret=${Stripe_WebhookSecret}
+      - Stripe__PublishableKey=${Stripe_PublishableKey}
+ 
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: api-sqlserver
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=Developer
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - mynetwork
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${SA_PASSWORD}" -Q "SELECT 1" -C -b || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 15
+      start_period: 60s
+
+  frontend:
+    build:
+      context: ./Ecommerce-Frontend
+      dockerfile: Dockerfile
+      args:
+      - VITE_API_URL=http://localhost:5000/api
+      - VITE_STATIC_IMAGES_URL=http://localhost:5000/StaticImages
+    ports:
+      - "3000:80"
+    volumes:
+      # Change the host path to point to the root where the file actually is
+      - ./nginx.conf:/etc/nginx.conf:ro
+    networks:
+      - mynetwork
+    depends_on:
+      - api
+
+volumes:
+  sqlserver-data:
+  product-images:
+networks:
+  mynetwork:

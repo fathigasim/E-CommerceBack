@@ -46,7 +46,7 @@ namespace EcommerceApplication.Features.Auth.Commands.UserManagement.ResetPasswo
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
             var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-            var resetLink = $"{_config["SmtpSettings:FrontendUrl"]}/reset-password?email={user.Email}&token={encodedToken}";
+            var resetLink = $"{_config["FrontendUrl:FrontendUrl"]}/reset-password?email={user.Email}&token={encodedToken}";
             var subject = "Reset Your Password";
 
             var message = $@"
