@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using EcommerceApplication.Common;
 using EcommerceApplication.Common.Settings;
 using EcommerceApplication.Features.Orders.DTOs;
 using EcommerceDomain.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace EcommerceApplication.Features.Orders.Queries
 {
-    public class GetAllOrdersQueryHandler : IRequestHandler<GetAllOrdersQuery, Result<IReadOnlyList<OrderDto>>>
+    public class GetAllOrdersQueryHandler : IRequestHandler<GetAllOrdersQuery, Result<PaginatedList<OrderDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -22,17 +24,30 @@ namespace EcommerceApplication.Features.Orders.Queries
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Result<IReadOnlyList<OrderDto>>> Handle(GetAllOrdersQuery request, CancellationToken cancellationToken)
+        public async Task<Result<PaginatedList<OrderDto>>> Handle(GetAllOrdersQuery request, CancellationToken cancellationToken)
         {
-            var orders = await _unitOfWork.Orders.GetOrdersAsync(cancellationToken);
-            if (orders.Any())
+            var result = await _unitOfWork.Orders.GetPagedAsync<OrderDto>(
+                request.Page,request.PageSize,cancellationToken:cancellationToken,filter:
+                 p=> (string.IsNullOrEmpty(request.q)||p.Id.ToString().Contains(request.q)),
+                  orderBy: p=>p.OrderByDescending(o=>o.OrderDate)
+                );
+            if (result.Items.Any())
             {
-                var ordersDto = _mapper.Map<List<OrderDto>>(orders);
-             
-                
-                    return Result<IReadOnlyList<OrderDto>>.Success(ordersDto);
+               
+
+
+                return Result<PaginatedList<OrderDto>>.Success(
+                    new PaginatedList<OrderDto> {
+
+                    Items = result.Items,
+                  PageNumber = request.Page,
+                  PageSize = request.PageSize,
+                 TotalCount = result.TotalCount});
             }
-            return Result<IReadOnlyList<OrderDto>>.Failure("No orders to fetch");
+
+            return Result<PaginatedList<OrderDto>>.Failure("No orders to fetch");
+        }
+            
         }
     }
-}
+

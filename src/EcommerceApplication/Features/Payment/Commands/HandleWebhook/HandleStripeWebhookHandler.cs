@@ -50,7 +50,20 @@ namespace MediaRTutorialApplication.Features.Payment.Commands.HandleWebhook
 
             payment.UpdatedAt = DateTime.UtcNow;
             await _unitOfWork.Payments.UpdateAsync(payment, cancellationToken);
+           var orderToUpdate= await _unitOfWork.Orders.GetByIdAsync(payment.OrderId.Value, cancellationToken);
+            orderToUpdate.Status = payment.Status switch
+            {
+                PaymentStatus.Succeeded => OrderStatus.Processing,
+                PaymentStatus.Failed => OrderStatus.Cancelled,
+                PaymentStatus.Cancelled => OrderStatus.Cancelled,
+                // PaymentStatus.Refunded => OrderStatus.Refunded,
+                _ => orderToUpdate.Status
+            };
+
+            _unitOfWork.Orders.Update(orderToUpdate);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
+            _logger.LogInformation(
+              "Update {OrderId} updated to ", payment.OrderId);
             _logger.LogInformation(
                 "Payment {Id} updated to {Status}", payment.Id, payment.Status);
 

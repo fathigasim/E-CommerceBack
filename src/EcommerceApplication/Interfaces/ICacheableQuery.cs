@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MediaRTutorialApplication.Interfaces
+namespace EcommerceApplication.Interfaces
 {
     public interface ICacheableQuery
     {

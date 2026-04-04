@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EcommerceDomain.Interfaces
 {
-    public interface IOrderRepository : IRepository<Order>
+    public interface IOrderRepository : IRepository<Order>,IPagedRepository<Order>
     {
 
         Task<IReadOnlyList<Order>> GetOrdersAsync(CancellationToken cancellationToken = default);

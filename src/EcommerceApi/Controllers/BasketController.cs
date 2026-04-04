@@ -26,22 +26,7 @@ namespace MediaRTutorial.Controllers
         public async Task<ActionResult<BasketDto>> GetBasket()
         {
             var result = await _mediator.Send(new GetBasketQuery());
-            if (result.IsSuccess)
-            {
-                if (result.Data.Items.Any())
-                {
-                    return Ok(result.Data);
-                }
-                else
-                {
-                    return NotFound( new { message= "No items found in the basket" });
-                }
-            }
-            else
-            {
-                return BadRequest(result.ErrorMessage);
-            }
-            
+           return result.IsSuccess ? Ok(result) : BadRequest(result.ErrorMessage); 
         }
 
         [HttpGet("Summary")]

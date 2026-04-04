@@ -10,7 +10,7 @@ namespace MediaRTutorial.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class OrderController : ControllerBase
     {
         private readonly ILogger<OrderController> _logger;
@@ -22,10 +22,10 @@ namespace MediaRTutorial.Controllers
             _mediator = mediator;
         }
         [HttpGet("GetOrders")]
-        public async Task <IActionResult> GetOrders()
+        public async Task <IActionResult> GetOrders(string? q,int pageNumber,int pageSize)
         {
             // Placeholder for getting orders
-          var result=await  _mediator.Send(new GetAllOrdersQuery());
+          var result=await  _mediator.Send(new GetAllOrdersQuery(q,pageNumber,pageSize));
             return Ok(result);
         }
 

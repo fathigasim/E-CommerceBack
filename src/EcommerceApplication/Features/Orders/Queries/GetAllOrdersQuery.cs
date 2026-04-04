@@ -1,4 +1,5 @@
 ﻿
+using EcommerceApplication.Common;
 using EcommerceApplication.Common.Settings;
 using EcommerceApplication.Features.Orders.DTOs;
 using MediatR;
@@ -10,6 +11,6 @@ using System.Threading.Tasks;
 
 namespace EcommerceApplication.Features.Orders.Queries
 {
-    public record GetAllOrdersQuery:IRequest<Result<IReadOnlyList<OrderDto>>>;
+    public record GetAllOrdersQuery(string? q,int Page, int PageSize = 6) :IRequest<Result<PaginatedList<OrderDto>>>;
     
 }

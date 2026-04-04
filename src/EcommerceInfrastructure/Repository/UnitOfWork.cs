@@ -67,7 +67,7 @@ namespace EcommerceInfrastructure.Repository
                 _categories ??= new CategoryRepository(_context);
 
             public IOrderRepository Orders =>
-                _orders ??= new OrderRepository(_context);
+                _orders ??= new OrderRepository(_context,_mapper);
             public IPaymentRepository Payments =>
               _payments ??= new PaymentRepository(_context, _mapper);
 

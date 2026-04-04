@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceInfrastructure.Repository
 {
-    public class OrderRepository : Repository<Order>, IOrderRepository
+    public class OrderRepository : PagedRepository<Order>, IOrderRepository
     {
-        public OrderRepository(AppDbContext context) : base(context) { }
+        public OrderRepository(AppDbContext context,IMapper mapper) : base(context,mapper) { }
 
         public async Task<IReadOnlyList<Order>> GetOrdersAsync(CancellationToken cancellationToken = default)
         {
