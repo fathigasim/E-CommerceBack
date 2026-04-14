@@ -16,15 +16,17 @@ namespace EcommerceApplication.Exceptions
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
-        private readonly IStringLocalizer<SharedResource> _localizer;
+        //private readonly IStringLocalizer<SharedResource> _localizer;
         public ExceptionHandlingMiddleware(
             RequestDelegate next,
-            ILogger<ExceptionHandlingMiddleware> logger,
-            IStringLocalizer<SharedResource> localizer)
+            ILogger<ExceptionHandlingMiddleware> logger
+            //,
+            //IStringLocalizer<SharedResource> localizer
+            )
         {
             _next = next;
             _logger = logger;
-            _localizer = localizer;
+            //_localizer = localizer;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -66,7 +68,7 @@ namespace EcommerceApplication.Exceptions
                 response = new ValidationProblemDetails(modelState)
                 {
                     Status = StatusCodes.Status400BadRequest,
-                    Title = _localizer["ValidationError"],
+                    Title = "ValidationError",//_localizer["ValidationError"],
                     Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
                 };
                 statusCode = StatusCodes.Status400BadRequest;
@@ -110,26 +112,30 @@ namespace EcommerceApplication.Exceptions
             // 1. Add using System.Net.Http; at the top of your file
             else if (exception is HttpRequestException httpException)
             {
+                bool isNetworkDown = httpException.InnerException is System.Net.Sockets.SocketException;
                 // If StatusCode is null, it's usually a network/DNS failure (504)
                 // If it has a value, the external service (GOSI/Yakeen) returned an error (502)
                 statusCode = httpException.StatusCode switch
                 {
                     HttpStatusCode.Unauthorized => StatusCodes.Status401Unauthorized,
                     HttpStatusCode.Forbidden => StatusCodes.Status403Forbidden,
-                    HttpStatusCode.NotFound =>StatusCodes.Status404NotFound,
-                    null => StatusCodes.Status504GatewayTimeout,
+                    HttpStatusCode.NotFound => StatusCodes.Status404NotFound,
+                    null => isNetworkDown ? StatusCodes.Status503ServiceUnavailable : StatusCodes.Status504GatewayTimeout,
                     _ => StatusCodes.Status502BadGateway
                 };
 
                 response = new ProblemDetails
                 {
                     Status = statusCode,
-                    // Use localizer for a generic message, or use httpException.Message for debugging
-                    Title = statusCode == StatusCodes.Status504GatewayTimeout
-                            ? _localizer["ExternalServiceTimeout"]
-                            : _localizer["ExternalServiceError"],
-                    Detail = httpException.Message // Optional: remove in production for security
+                    Title = statusCode switch
+                    {
+                        StatusCodes.Status503ServiceUnavailable => "ExternalServiceUnavailable",
+                        StatusCodes.Status504GatewayTimeout => "ExternalServiceTimeout",
+                        _ => "ExternalServiceError"
+                    },
+                    Detail = "The request could not be completed due to an external connectivity issue."
                 };
+                _logger.LogError("Exception Middleware Error: {Message}", httpException.Message);
             }
             else
             {
@@ -137,7 +143,7 @@ namespace EcommerceApplication.Exceptions
 
                 response = new ProblemDetails
                 {
-                    Title = _localizer["InternalServerError"],
+                    Title = "InternalServerError",//_localizer["InternalServerError"],
                     Status = StatusCodes.Status500InternalServerError
                 };
                 statusCode = StatusCodes.Status500InternalServerError;
@@ -153,5 +159,5 @@ namespace EcommerceApplication.Exceptions
             await context.Response.WriteAsync(json);
         }
     }
-    
+
 }
