@@ -2,6 +2,7 @@
 using EcommerceApplication.Interfaces;
 using EcommerceDomain.Entities;
 using EcommerceDomain.Interfaces;
+using EcommerceInfrastructure.ExternalServices;
 using EcommerceInfrastructure.Identity;
 using EcommerceInfrastructure.Payments;
 using EcommerceInfrastructure.Persistance;
@@ -157,7 +158,22 @@ namespace EcommerceInfrastructure
             //.AddTransientHttpErrorPolicy(policy =>
             //   policy.WaitAndRetryAsync(3, retryAttempt =>
             //   TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))));
-           
+            services.AddHttpClient<IJsonPlacehodlerService, JsonPlacehodlerService>(client =>
+            {
+                client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+                
+                
+            }).AddPolicyHandler(GetRetryPolicy())
+            .AddPolicyHandler(GetCircuitBreakerPolicy());
+
+            services.AddHttpClient<IReqResService, ReqResService>(client =>
+            {
+                client.BaseAddress = new Uri("https://reqres.in/api/");
+                client.DefaultRequestHeaders.Add("x-api-key", "reqres_1d82edb6a5dc42178e0dc475095779bf");
+
+            }).AddPolicyHandler(GetRetryPolicy())
+             .AddPolicyHandler(GetCircuitBreakerPolicy());
+
 
 
             static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
